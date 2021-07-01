@@ -10,11 +10,7 @@ class Vehicle():
         self.acceleration = PVector(0, 0)
         self.velocity = vel
         self.position = PVector(x, y)
-<<<<<<< HEAD
-        self.r = 4
-=======
         self.r = 8
->>>>>>> master
         self.maxspeed = 5
         self.maxforce = 0.2
 
@@ -48,26 +44,14 @@ class Vehicle():
     def display(self):
         # Draw a triangle rotated in the direction of velocity
         theta = self.velocity.heading() #+ PI / 2
-<<<<<<< HEAD
-        fill(255, 0, 0)
-=======
         fill(0, 255, 125)
->>>>>>> master
         noStroke()
         strokeWeight(1)
         with pushMatrix():
             translate(self.position.x, self.position.y)
             rotate(theta)
-<<<<<<< HEAD
-            beginShape()
-            vertex(0, -self.r * 2)
-            vertex(-self.r, self.r * 2)
-            vertex(self.r, self.r * 2)
-            endShape(CLOSE)
-=======
             rect(0, 0, self.r, self.r)
             # beginShape()
             # vertex(0, -self.r * 2)
             # vertex(-self.r, self.r * 2)
             # vertex(self.r, self.
->>>>>>> master
