@@ -10,16 +10,17 @@ from vehicle import Vehicle
 from food import Food
 import random
 import time
-from queue import Queue
+from queue import Queue, PriorityQueue
 import sys
 sys.setrecursionlimit(1000000)
 
-
+################## GLOBALS
 video_scale = 8
 vis = []
 path = []
 walked = 1
 
+############ BFS ############
 def bfs(g, start, goal):
     frontier = Queue()
     frontier.put(start)
@@ -43,6 +44,7 @@ def bfs(g, start, goal):
     print('Found')
     return visited, came_from
 
+############### DFS #############
 def dfs(graph, start, goal):
     visited = []
     stack = []
@@ -62,8 +64,75 @@ def dfs(graph, start, goal):
                     stack.append(neighbor)
             
     
-    return visited, came_from    
+    return visited, came_from
+
+def cost(s):
+    if s in water:
+        return 10
+    elif s in sand:
+        return 5
+    else:
+        return 1
+
+############# dijkstra
+def dijkstra(graph, start, goal):
+    frontier = PriorityQueue()
+    frontier.put(start, 0)
+    came_from = {}
+    cost_so_far = {}
+    came_from[start] = None
+    cost_so_far[start] = 0
+    visited = []
+
+    while not frontier.empty():
+        current = frontier.get()
+        visited.append(current)
+        
+        if current == goal:
+            print('Found')
+            break
+        
+        for next in graph[current]:
+            new_cost = cost_so_far[current] + cost(next)
+            if next not in cost_so_far or new_cost < cost_so_far[next]:
+                cost_so_far[next] = new_cost
+                priority = new_cost
+                frontier.put(next, priority)
+                came_from[next] = current
     
+    return visited, came_from
+
+def heuristic(a, b):
+    (x1, y1) = a
+    (x2, y2) = b
+    return abs(x1 - x2) + abs(y1 - y2)
+
+########### greedy
+def greedy(graph, start, goal):
+    frontier = PriorityQueue()
+    frontier.put(start, 0)
+    came_from = {}
+    came_from[start] = None
+    visited = []
+
+    while not frontier.empty():
+        current = frontier.get()
+        visited.append(current)
+        
+        if current == goal:
+            print('Found')
+            break
+        
+        for next in graph[current]:
+            if next not in came_from:                
+                priority = heuristic(goal, next)
+                frontier.put(next, priority)
+                came_from[next] = current
+    
+    return visited, came_from
+
+    
+# função para achar o caminho a partir da busca
 def reconstruct_path(came_from, start, goal):
     current = goal
     path = []
@@ -73,8 +142,9 @@ def reconstruct_path(came_from, start, goal):
     path.append(start)
     return path
 
-
-def create_sand():
+#criação da areia
+def create_sand():    
+    global sand
     obs_x = [random.randint(0, cols-1) for i in range(0, 50, 1)]
     obs_x = [i*video_scale for i in obs_x]
     obs_y = [random.randint(0, rows-1) for i in range(0, 50, 1)]
@@ -85,7 +155,11 @@ def create_sand():
         stroke(0)
         rect(i, j, video_scale, video_scale)
     
+    sand = [tuple((x, y)) for (x, y) in zip(obs_x, obs_y)] #posições na qual há areia
+    
+#criação da água
 def create_water():
+    global water
     obs_x = [random.randint(0, cols-1) for i in range(0, 50, 1)]
     obs_y = [random.randint(0, rows-1) for i in range(0, 50, 1)]
     
@@ -93,6 +167,8 @@ def create_water():
         fill(0, 0, 255)
         stroke(0)
         rect(i*video_scale, j*video_scale, video_scale, video_scale)
+    
+    water = [tuple((x, y)) for (x, y) in zip(obs_x, obs_y)] #posições na qual há areia
         
 def neighbours(i, j, obs):
     n = [(i+1,j+1), (i-1,j-1), (i-1,j+1), (i+1,j-1), (i, j-1), (i, j+1), (i+1, j), (i-1, j)]
@@ -126,14 +202,19 @@ def setup():
             fill(255)
             stroke(0)
             rect(x, y, video_scale, video_scale)
-            
+    
+    #Criando areia
+    global sand
     create_sand()
+    #Criando água
+    global water
     create_water()
+    
+    #Criando os obstaculos
     obs_x = [random.randint(0, cols-1) for i in range(0, 50, 1)]
     obs_y = [random.randint(0, rows-1) for i in range(0, 50, 1)]
     
     global obs
-    
     obs = [tuple((x, y)) for (x, y) in zip(obs_x, obs_y)]
     
     for (i, j) in zip(obs_x, obs_y):
@@ -194,7 +275,7 @@ def draw():
         
         food.update()
         food.display()
-        vis, paths = bfs(g, start_pos, final_pos)
+        vis, paths = greedy(g, start_pos, final_pos)
         path = reconstruct_path(paths, start_pos, final_pos)
         vis.reverse()
         walked = 0
@@ -205,18 +286,27 @@ def draw():
         rect(last[0]*video_scale, last[1]*video_scale, video_scale, video_scale)
         
     else:
-        #vehicle.seek(PVector(path[-1][0]*video_scale, path[-1][1]*video_scale))
+        
         v_pos = path.pop()
+        '''
         if len(path) > 1:
             next = path[-1]
             line(v_pos[0]*video_scale, v_pos[1]*video_scale, next[0]*video_scale, next[1]*video_scale)
             stroke(255,0,0)
+        '''
         
         vel = PVector(0,0)
         vehicle = Vehicle(v_pos[0]*video_scale, v_pos[1]*video_scale, vel)
         vehicle.update()
         vehicle.display()
-        time.sleep(0.1)
+        if v_pos in water:
+            print('water')
+            time.sleep(1) #movimento atrasa 10 vezes na água
+        elif v_pos in sand:
+            print('sand')
+            time.sleep(0.5) #movimento atrasa 5 vezes na areia
+        else:
+            time.sleep(0.1)
         if len(path)<1:
             walked = 1
     
