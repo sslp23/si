@@ -19,6 +19,7 @@ video_scale = 8
 vis = []
 path = []
 walked = 1
+comeu = 0
 
 ############ BFS ############
 def bfs(g, start, goal):
@@ -126,6 +127,34 @@ def greedy(graph, start, goal):
         for next in graph[current]:
             if next not in came_from:                
                 priority = heuristic(goal, next)
+                frontier.put(next, priority)
+                came_from[next] = current
+    
+    return visited, came_from
+
+##########a star
+def astar(graph, start, goal):
+    frontier = PriorityQueue()
+    frontier.put(start, 0)
+    came_from = {}
+    cost_so_far = {}
+    came_from[start] = None
+    cost_so_far[start] = 0
+    visited = []
+
+    while not frontier.empty():
+        current = frontier.get()
+        visited.append(current)
+        
+        if current == goal:
+            print('Found')
+            break
+        
+        for next in graph[current]:
+            new_cost = cost_so_far[current] + cost(next)
+            if next not in cost_so_far or new_cost < cost_so_far[next]:
+                cost_so_far[next] = new_cost
+                priority = new_cost + heuristic(goal, next)
                 frontier.put(next, priority)
                 came_from[next] = current
     
@@ -269,13 +298,14 @@ def draw():
     global path
     global walked
     global vehicle
+    global comeu
     if len(vis)<1 and walked == 1:
         vehicle.update()
         vehicle.display()
         
         food.update()
         food.display()
-        vis, paths = greedy(g, start_pos, final_pos)
+        vis, paths = astar(g, start_pos, final_pos)
         path = reconstruct_path(paths, start_pos, final_pos)
         vis.reverse()
         walked = 0
@@ -312,6 +342,8 @@ def draw():
     
     
     if walked == 1:
+        comeu+=1
+        print('comeu %d comidas'%(comeu))
         setup()
     #fill(127,127,127,10)
     #rect(last[0], last[1], video_scale, video_scale)
