@@ -106,16 +106,6 @@ def neighbours(i, j, obs):
     for t in takeout:
         n.remove(t)
     return n
-
-def inside_rect(x):
-    global obs
-    l = 8
-    for s in obs:
-        if (s[0] <= x[0] <= s[0]+l) and ( s[1]<= x[1] <= s[1]+l):
-            return True
-
-
-    return False
     
 
 def setup():
@@ -127,6 +117,7 @@ def setup():
     rows = int(height/video_scale)
     
     background(255)
+    
     rand = random.randint(5, 10)
     for i in range(0, cols, 1):
         for j in range(0, rows, 1):
@@ -136,20 +127,21 @@ def setup():
             stroke(0)
             rect(x, y, video_scale, video_scale)
             
+    create_sand()
+    create_water()
     obs_x = [random.randint(0, cols) for i in range(0, 50, 1)]
     obs_y = [random.randint(0, rows) for i in range(0, 50, 1)]
     
     global obs
     
-    obs = [tuple((x, y)) for (x, y) in zip (obs_x, obs_y)]
+    obs = [tuple((x, y)) for (x, y) in zip(obs_x, obs_y)]
     
     for (i, j) in zip(obs_x, obs_y):
         fill(255,0,255)
         stroke(0)
         rect(i*video_scale, j*video_scale, video_scale, video_scale)
     
-    create_sand()
-    create_water()
+    
     
     global vehicle
     
@@ -171,8 +163,8 @@ def setup():
     
     global final_pos
     while (x,y) in obs:
-        x = random.randint(0, 640)
-        y = random.randint(0, 480)
+        x = random.randint(0, cols)
+        y = random.randint(0, rows)
     final_pos = (x, y)
     food = Food(x*video_scale, y*video_scale, velocity)
 
@@ -193,6 +185,7 @@ def draw():
     global vis
     global path
     global walked
+    global vehicle
     if len(vis)<1 and walked == 1:
         vehicle.update()
         vehicle.display()
@@ -217,10 +210,11 @@ def draw():
             line(v_pos[0]*video_scale, v_pos[1]*video_scale, next[0]*video_scale, next[1]*video_scale)
             stroke(255,0,0)
         
-        
-        vehicle.position = PVector(v_pos[0]*video_scale, v_pos[1]*video_scale)
+        vel = PVector(0,0)
+        vehicle = Vehicle(v_pos[0]*video_scale, v_pos[1]*video_scale, vel)
         vehicle.update()
         vehicle.display()
+        time.sleep(0.1)
         if len(path)<1:
             walked = 1
     
