@@ -20,8 +20,6 @@ vis = []
 path = []
 walked = 1
 comeu = 0
-waiter=0
-usr_input = 0
 
 ############ BFS ############
 def bfs(g, start, goal):
@@ -163,7 +161,7 @@ def astar(graph, start, goal):
     return visited, came_from
 
     
-# função para achar o cami33nho a partir da busca
+# função para achar o caminho a partir da busca
 def reconstruct_path(came_from, start, goal):
     current = goal
     path = []
@@ -213,16 +211,9 @@ def neighbours(i, j, obs):
     for t in takeout:
         n.remove(t)
     return n
-    
 
-def setup():
-    ## MAP
-    size(640, 480)
-    global cols
-    cols = int(width/video_scale)
-    global rows
-    rows = int(height/video_scale)
-    
+#função para criar o mapa
+def map():
     background(255)
     
     rand = random.randint(5, 10)
@@ -253,8 +244,6 @@ def setup():
         stroke(0)
         rect(i*video_scale, j*video_scale, video_scale, video_scale)
     
-    
-    
     global vehicle
     
     velocity = PVector(0, 0)
@@ -269,6 +258,7 @@ def setup():
     start_pos = (x, y)
     
     print(start_pos)
+    
     global food
     velocity = PVector(0, 0)
     x = random.randint(0, cols-1)
@@ -283,6 +273,17 @@ def setup():
     food = Food(x*video_scale, y*video_scale, velocity)
 
     
+
+def setup():
+    ## MAP
+    size(640, 480)
+    global cols
+    cols = int(width/video_scale)
+    global rows
+    rows = int(height/video_scale)
+    
+    
+    make_map()
     global g
     g = {}
     for i in range(0, cols, 1):
@@ -296,83 +297,56 @@ def setup():
 
     
 def draw():
-    global waiter
-    global usr_input
+    global vis
+    global path
+    global walked
     global vehicle
-    vehicle.update()
-    vehicle.display()
-    
-    food.update()
-    food.display()
-
-    if waiter == 1:
-        global vis
-        global path
-        global walked
-
-        global comeu
-        if len(vis)<1 and walked == 1:
-
-            if int(usr_input) == 1: #bfs
-                vis, paths = bfs(g, start_pos, final_pos) 
-            elif int(usr_input) == 2: #dfs
-                vis, paths = dfs(g, start_pos, final_pos)
-            elif int(usr_input) == 3: #dijkstra
-                vis, paths = dijkstra(g, start_pos, final_pos)
-            elif int(usr_input) == 4: #greedy
-                vis, paths = greedy(g, start_pos, final_pos)
-            else: #astar
-                vis, paths = astar(g, start_pos, final_pos)
-                
-            
-            path = reconstruct_path(paths, start_pos, final_pos)
-            vis.reverse()
-            walked = 0
+    global comeu
+    if len(vis)<1 and walked == 1:
+        vehicle.update()
+        vehicle.display()
         
-        if len(vis)>0:
-            last = vis.pop()
-            fill(127,127,127,220)
-            rect(last[0]*video_scale, last[1]*video_scale, video_scale, video_scale)
-            
+        food.update()
+        food.display()
+        vis, paths = astar(g, start_pos, final_pos)
+        path = reconstruct_path(paths, start_pos, final_pos)
+        vis.reverse()
+        walked = 0
+    
+    if len(vis)>0:
+        last = vis.pop()
+        fill(127,127,127,220)
+        rect(last[0]*video_scale, last[1]*video_scale, video_scale, video_scale)
+        
+    else:
+        
+        v_pos = path.pop()
+        '''
+        if len(path) > 1:
+            next = path[-1]
+            line(v_pos[0]*video_scale, v_pos[1]*video_scale, next[0]*video_scale, next[1]*video_scale)
+            stroke(255,0,0)
+        '''
+        
+        vel = PVector(0,0)
+        vehicle = Vehicle(v_pos[0]*video_scale, v_pos[1]*video_scale, vel)
+        vehicle.update()
+        vehicle.display()
+        if v_pos in water:
+            print('water')
+            time.sleep(1) #movimento atrasa 10 vezes na água
+        elif v_pos in sand:
+            print('sand')
+            time.sleep(0.5) #movimento atrasa 5 vezes na areia
         else:
-            
-            v_pos = path.pop()
-            '''
-            if len(path) > 1:
-                next = path[-1]
-                line(v_pos[0]*video_scale, v_pos[1]*video_scale, next[0]*video_scale, next[1]*video_scale)
-                stroke(255,0,0)
-            '''
-            
-            vel = PVector(0,0)
-            vehicle = Vehicle(v_pos[0]*video_scale, v_pos[1]*video_scale, vel)
-            vehicle.update()
-            vehicle.display()
-            if v_pos in water:
-                print('water')
-                time.sleep(1) #movimento atrasa 10 vezes na água
-            elif v_pos in sand:
-                print('sand')
-                time.sleep(0.5) #movimento atrasa 5 vezes na areia
-            else:
-                time.sleep(0.1)
-            if len(path)<1:
-                walked = 1
-        
-        
-        if walked == 1:
-            comeu+=1
-            print('comeu %d comidas'%(comeu))
-            waiter = 0
-            setup()
-        #fill(127,127,127,10)
-        #rect(last[0], last[1], video_scale, video_scale)
+            time.sleep(0.1)
+        if len(path)<1:
+            walked = 1
     
-
-def keyPressed():
-    global usr_input
-    usr_input = int(key)
-
-    global waiter
-    waiter=1
-                 
+    
+    if walked == 1:
+        comeu+=1
+        print('comeu %d comidas'%(comeu))
+        setup()
+    #fill(127,127,127,10)
+    #rect(last[0], last[1], video_scale, video_scale)
