@@ -217,11 +217,12 @@ def neighbours(i, j, obs):
 
 def setup():
     ## MAP
-    size(640, 480)
+    size(640, 520)
     global cols
     cols = int(width/video_scale)
+
     global rows
-    rows = int(height/video_scale)
+    rows = int(480/video_scale)
     
     background(255)
     
@@ -299,6 +300,8 @@ def draw():
     global waiter
     global usr_input
     global vehicle
+    global comeu
+    last_alg = ""
     vehicle.update()
     vehicle.display()
     
@@ -310,20 +313,24 @@ def draw():
         global path
         global walked
 
-        global comeu
+        
         if len(vis)<1 and walked == 1:
 
             if int(usr_input) == 1: #bfs
-                vis, paths = bfs(g, start_pos, final_pos) 
+                vis, paths = bfs(g, start_pos, final_pos)
+                last_alg = "BFS" 
             elif int(usr_input) == 2: #dfs
                 vis, paths = dfs(g, start_pos, final_pos)
+                last_alg = "DFS"
             elif int(usr_input) == 3: #dijkstra
                 vis, paths = dijkstra(g, start_pos, final_pos)
+                last_alg = "DIJKSTRA"
             elif int(usr_input) == 4: #greedy
                 vis, paths = greedy(g, start_pos, final_pos)
+                last_alg = "GREEDY"
             else: #astar
                 vis, paths = astar(g, start_pos, final_pos)
-                
+                last_alg = "A*"
             
             path = reconstruct_path(paths, start_pos, final_pos)
             vis.reverse()
@@ -367,7 +374,11 @@ def draw():
             setup()
         #fill(127,127,127,10)
         #rect(last[0], last[1], video_scale, video_scale)
+    else:
+        text("Escolha o algoritmo: 1 - BFS / 2 - DFS / 3 - DIJKSTRA / 4 - GREEDY / 5 - A*", x= 0, y=495)
     
+    text("Algoritmo usado: %s"%(last_alg),x=0, y=510)
+    text("Placar: %d"%(comeu), x=560, y=495)
 
 def keyPressed():
     global usr_input
