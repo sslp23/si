@@ -75,9 +75,9 @@ def reconstruct_path(came_from, start, goal):
 
 
 def create_sand():
-    obs_x = [random.randint(0, cols) for i in range(0, 50, 1)]
+    obs_x = [random.randint(0, cols-1) for i in range(0, 50, 1)]
     obs_x = [i*video_scale for i in obs_x]
-    obs_y = [random.randint(0, rows) for i in range(0, 50, 1)]
+    obs_y = [random.randint(0, rows-1) for i in range(0, 50, 1)]
     obs_y = [j*video_scale for j in obs_y] 
     
     for (i, j) in zip(obs_x, obs_y):
@@ -86,8 +86,8 @@ def create_sand():
         rect(i, j, video_scale, video_scale)
     
 def create_water():
-    obs_x = [random.randint(0, cols) for i in range(0, 50, 1)]
-    obs_y = [random.randint(0, rows) for i in range(0, 50, 1)]
+    obs_x = [random.randint(0, cols-1) for i in range(0, 50, 1)]
+    obs_y = [random.randint(0, rows-1) for i in range(0, 50, 1)]
     
     for (i, j) in zip(obs_x, obs_y):
         fill(0, 0, 255)
@@ -129,8 +129,8 @@ def setup():
             
     create_sand()
     create_water()
-    obs_x = [random.randint(0, cols) for i in range(0, 50, 1)]
-    obs_y = [random.randint(0, rows) for i in range(0, 50, 1)]
+    obs_x = [random.randint(0, cols-1) for i in range(0, 50, 1)]
+    obs_y = [random.randint(0, rows-1) for i in range(0, 50, 1)]
     
     global obs
     
@@ -146,26 +146,28 @@ def setup():
     global vehicle
     
     velocity = PVector(0, 0)
-    x = random.randint(0, cols)
-    y = random.randint(0, rows)
+    x = random.randint(0, cols-1)
+    y = random.randint(0, rows-1)
     
     global start_pos
     while (x,y) in obs:
-        x = random.randint(0, cols)
-        y = random.randint(0, rows)
+        x = random.randint(0, cols-1)
+        y = random.randint(0, rows-1)
     vehicle = Vehicle(x*video_scale, y*video_scale, velocity)
     start_pos = (x, y)
-        
+    
+    print(start_pos)
     global food
     velocity = PVector(0, 0)
-    x = random.randint(0, cols)
-    y = random.randint(0, rows)
+    x = random.randint(0, cols-1)
+    y = random.randint(0, rows-1)
     
     global final_pos
     while (x,y) in obs:
-        x = random.randint(0, cols)
-        y = random.randint(0, rows)
+        x = random.randint(0, cols-1)
+        y = random.randint(0, rows-1)
     final_pos = (x, y)
+    print(final_pos)
     food = Food(x*video_scale, y*video_scale, velocity)
 
     
