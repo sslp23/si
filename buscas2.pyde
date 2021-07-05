@@ -2,7 +2,7 @@
 # Daniel Shiffman
 # http://natureofcode.com
 #
-# Modified by Filipe Calegario
+# Modified by sslp23
 
 # Draws a "vehicle" on the screen
 
